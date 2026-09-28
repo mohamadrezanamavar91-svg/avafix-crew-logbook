@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AvaFix Crew Logbook</title>
+    <style>
+        :root {
+            --bg-dark: #090B10;
+            --card-bg: #12151D;
+            --primary-red: #D31A2B;
+            --accent-cyan: #00E5FF;
+            --text-main: #FFFFFF;
+            --text-sub: #A0AEC0;
+            --border-clr: #232936;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            color: var(--text-main);
+            font-family: system-ui, -apple-system, sans-serif;
+            direction: rtl;
+        }
+        .header {
+            background: var(--card-bg);
+            padding: 14px 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-clr);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 17px; }
+        .brand-badge { background: var(--primary-red); color: white; padding: 2px 7px; border-radius: 6px; font-size: 11px; }
+        .drawer-btn {
+            background: #1A202C;
+            border: 1px solid var(--border-clr);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .container { padding: 14px; max-width: 520px; margin: 0 auto; }
+        
+        .month-banner {
+            background: linear-gradient(135deg, #1C1917 0%, #12151D 100%);
+            border: 1px solid #38292B;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 14px;
+        }
+        .month-banner-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .month-title { font-size: 13px; color: var(--text-sub); }
+        .month-hours { font-size: 24px; font-weight: 900; color: #68D391; }
+        .month-hours span { font-size: 13px; color: var(--primary-red); font-weight: normal; margin-right: 4px; }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-clr);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+        }
+        .section-header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #E2E8F0;
+        }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-size: 12px; color: var(--text-sub); margin-bottom: 6px; }
+        select {
+            width: 100%;
+            background: #1A202C;
+            border: 1px solid var(--border-clr);
+            color: white;
+            padding: 10px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+        }
+        .date-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .gregorian-badge {
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--accent-cyan);
+            background: #111E2E;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #1E3A5F;
+            direction: ltr;
+            text-align: right;
+        }
+
+        .btn-add-leg {
+            width: 100%;
+            background: #2D3748;
+            color: white;
+            border: 1px dashed #4A5568;
+            padding: 11px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 4px;
+        }
+        .btn-add-leg:active { background: #374151; }
+
+        .legs-list { margin: 12px 0; }
+        .leg-row {
+            background: #161A23;
+            border: 1px solid var(--border-clr);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+        .leg-badge {
+            background: rgba(211, 26, 43, 0.2);
+            color: #FF6B6B;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .btn-remove-leg {
+            background: none;
+            border: none;
+            color: #E53E3E;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 4px;
+        }
+
+        .total-box {
+            background: #181D28;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            border: 1px solid #2D3748;
+        }
+        .total-time-val { font-size: 18px; font-weight: 900; color: #68D391; }
+
+        button.btn-primary {
+            width: 100%;
+            background: var(--primary-red);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button.btn-primary:disabled {
+            background: #4A5568;
+            cursor: not-allowed;
+        }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            z-index: 200;
+        }
+        .drawer-content {
+            position: fixed;
+            top: 0; bottom: 0; right: -350px;
+            width: 330px;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-clr);
+            z-index: 201;
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+        .drawer-open .drawer-overlay { display: block; }
+        .drawer-open .drawer-content { right: 0; }
+        .drawer-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-clr);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .drawer-body {
+            padding: 14px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .month-group-card {
+            background: #161A23;
+            border: 1px solid #2D3748;
+            border-radius: 8px;
+            margin-bottom: 14px;
+            overflow: hidden;
+        }
+        .month-group-header {
+            background: #1E2430;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #2D3748;
+        }
+        .archive-item {
+            padding: 10px 12px;
+            border-bottom: 1px solid #232936;
+        }
+        .archive-item:last-child { border-bottom: none; }
+        .archive-item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .archive-leg-detail {
+            font-size: 11px;
+            color: var(--text-sub);
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3px;
+        }
+        .btn-del {
+            background: #E53E3E;
+            border: none;
+            color: white;
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="brand">
+            <span class="brand-badge">AVA</span>
+            <span>AvaFix Logbook</span>
+        </div>
+        <button class="drawer-btn" onclick="toggleDrawer(true)">📂 سوابق ماهانه</button>
+    </div>
+
+    <div class="container">
+        <div class="month-banner">
+            <div style="font-size:12px; color:var(--text-sub); margin-bottom:8px;">انتخاب دوره جهت محاسبه و بررسی:</div>
+            <div class="date-grid" style="margin-bottom: 12px;">
+                <select id="reviewYear" onchange="onReviewFilterChange()"></select>
+                <select id="reviewMonth" onchange="onReviewFilterChange()"></select>
+            </div>
+            <div class="month-banner-row">
+                <div>
+                    <div class="month-title" id="reviewBannerTitle">مجموع ساعات:</div>
+                    <div style="font-size:11px; color:#718096;" id="reviewGregorianPeriod">--</div>
+                </div>
+                <div class="month-hours" id="monthlyTotalDisplay">00:00 <span>ساعت</span></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-header">
+                <span>ثبت پرواز جدید</span>
+                <span id="legsCountBadge" style="font-size:11px; color:var(--text-sub);">۰ لگ انتخاب‌شده</span>
+            </div>
+
+            <div class="form-group">
+                <label>تاریخ پرواز (شمسی و میلادی):</label>
+                <div class="date-grid">
+                    <select id="flightYear" onchange="updateFlightDatePreview()"></select>
+                    <select id="flightMonth" onchange="updateFlightDatePreview()"></select>
+                    <select id="flightDay" onchange="updateFlightDatePreview()"></select>
+                </div>
+                <div class="gregorian-badge" id="gregorianDateDisplay">Gregorian: --</div>
+            </div>
+
+            <div class="form-group">
+                <label>انتخاب مسیر (FIXED TIME):</label>
+                <select id="routeSelect">
+                    <option value="THR-MHD|105|01:45">THR ➔ MHD (تهران - مشهد) | ۰۱:۴۵</option>
+                    <option value="MHD-THR|115|01:55">MHD ➔ THR (مشهد - تهران) | ۰۱:۵۵</option>
+                    <option value="THR-GSM|145|02:25">THR ➔ GSM (تهران - قشم) | ۰۲:۲۵</option>
+                    <option value="GSM-THR|155|02:35">GSM ➔ THR (قشم - تهران) | ۰۲:۳۵</option>
+                    <option value="MHD-KSH|165|02:45">MHD ➔ KSH (مشهد - کرمانشاه) | ۰۲:۴۵</option>
+                    <option value="KSH-MHD|145|02:25">KSH ➔ MHD (کرمانشاه - مشهد) | ۰۲:۲۵</option>
+                    <option value="MHD-SYZ|155|02:35">MHD ➔ SYZ (مشهد - شیراز) | ۰۲:۳۵</option>
+                    <option value="SYZ-MHD|140|02:20">SYZ ➔ MHD (شیراز - مشهد) | ۰۲:۲۰</option>
+                    <option value="MHD-AWZ|185|03:05">MHD ➔ AWZ (مشهد - اهواز) | ۰۳:۰۵</option>
+                    <option value="AWZ-MHD|160|02:40">AWZ ➔ MHD (اهواز - مشهد) | ۰۲:۴۰</option>
+                    <option value="THR-KIH|145|02:25">THR ➔ KIH (تهران - کیش) | ۰۲:۲۵</option>
+                    <option value="KIH-THR|145|02:25">KIH ➔ THR (کیش - تهران) | ۰۲:۲۵</option>
+                    <option value="MHD-IFN|140|02:20">MHD ➔ IFN (مشهد - اصفهان) | ۰۲:۲۰</option>
+                    <option value="IFN-MHD|125|02:05">IFN ➔ MHD (اصفهان - مشهد) | ۰۲:۰۵</option>
+                    <option value="MHD-TBZ|180|03:00">MHD ➔ TBZ (مشهد - تبریز) | ۰۳:۰۰</option>
+                    <option value="TBZ-MHD|160|02:40">TBZ ➔ MHD (تبریز - مشهد) | ۰۲:۴۰</option>
+                    <option value="THR-OMH|100|01:40">THR ➔ OMH (تهران - ارومیه) | ۰۱:۴۰</option>
+                    <option value="OMH-MHD|155|02:35">OMH ➔ MHD (ارومیه - مشهد) | ۰۲:۳۵</option>
+                    <option value="MHD-OMH|185|03:05">MHD ➔ OMH (مشهد - ارومیه) | ۰۳:۰۵</option>
+                    <option value="OMH-THR|95|01:35">OMH ➔ THR (ارومیه - تهران) | ۰۱:۳۵</option>
+                    <option value="THR-ADU|80|01:20">THR ➔ ADU (تهران - اردبیل) | ۰۱:۲۰</option>
+                    <option value="ADU-MHD|145|02:25">ADU ➔ MHD (اردبیل - مشهد) | ۰۲:۲۵</option>
+                    <option value="MHD-ADU|160|02:40">MHD ➔ ADU (مشهد - اردبیل) | ۰۲:۴۰</option>
+                    <option value="ADU-THR|75|01:15">ADU ➔ THR (اردبیل - تهران) | ۰۱:۱۵</option>
+                    <option value="THR-BND|140|02:20">THR ➔ BND (تهران - بندرعباس) | ۰۲:۲۰</option>
+                    <option value="BND-THR|155|02:35">BND ➔ THR (بندرعباس - تهران) | ۰۲:۳۵</option>
+                    <option value="MHD-RAM-MHD|250|04:10">MHD ⇄ RAM (مشهد - رامسر - مشهد | رفت و برگشت) | ۰۴:۱۰</option>
+                    <option value="MHD-BGW-MHD|375|06:15">MHD ⇄ BGW (مشهد - بغداد - مشهد | رفت و برگشت) | ۰۶:۱۵</option>
+                </select>
+            </div>
+
+            <button class="btn-add-leg" onclick="addLeg()">➕ اضافه کردن این لگ</button>
+
+            <div class="legs-list" id="currentLegsList"></div>
+
+            <div class="total-box">
+                <span style="font-size:13px; color:var(--text-sub);">مجموع ساعات این وظیفه:</span>
+                <span class="total-time-val" id="currentFlightTotal">00:00</span>
+            </div>
+
+            <button class="btn-primary" id="saveDutyBtn" onclick="saveFlightDuty()" disabled>
+                💾 ذخیره در پرونده ماه
+            </button>
+        </div>
+    </div>
+
+    <div id="drawerRoot">
+        <div class="drawer-overlay" onclick="toggleDrawer(false)"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h4 style="margin:0; font-size:15px;">بایگانی بر اساس ماه و سال</h4>
+                <span style="cursor:pointer; font-size:20px;" onclick="toggleDrawer(false)">✕</span>
+            </div>
+            <div class="drawer-body" id="archiveList"></div>
+        </div>
+    </div>
+
+    <script>
+        const PERSIAN_MONTHS = [
+            "فروردین", "اردیبهشت", "خرداد",
+            "تیر", "مرداد", "شهریور",
+            "مهر", "آبان", "آذر",
+            "دی", "بهمن", "اسفند"
+        ];
+
+        const G_MONTH_NAMES = [
+            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+        ];
+
+        function jalaliToGregorian(jy, jm, jd) {
+            var sal_a, gy, gm, gd, days;
+            jy += 1595;
+            days = -355668 + (365 * jy) + Math.floor(jy / 33) * 8 + Math.floor(((jy % 33) + 3) / 4) + jd + ((jm < 7) ? (jm - 1) * 31 : ((jm - 7) * 30) + 186);
+            gy = 400 * Math.floor(days / 146097);
+            days %= 146097;
+            if (days > 36524) {
+                gy += 100 * Math.floor(--days / 36524);
+                days %= 36524;
+                if (days >= 365) days++;
+            }
+            gy += 4 * Math.floor(days / 1461);
+            days %= 1461;
+            if (days > 365) {
+                gy += Math.floor((days - 1) / 365);
+                days = (days - 1) % 365;
+            }
+            gd = days + 1;
+            var sal_m = [0, 31, ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            for (gm = 1; gm <= 12; gm++) {
+                if (gd <= sal_m[gm]) break;
+                gd -= sal_m[gm];
+            }
+            return { gy: gy, gm: gm, gd: gd };
+        }
+
+        function formatMinutes(minutes) {
+            const h = Math.floor(minutes / 60);
+            const m = minutes % 60;
+            return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+        }
+
+        function initDatePickers() {
+            const years = [];
+            for(let y = 1405; y <= 1415; y++) years.push(y);
+
+            const populateSelect = (id, items) => {
+                const sel = document.getElementById(id);
+                sel.innerHTML = items.map(item => `<option value="${item.val}">${item.text}</option>`).join('');
+            };
+
+            const yearItems = years.map(y => ({ val: y, text: `${y} شمسی` }));
+            const monthItems = PERSIAN_MONTHS.map((m, idx) => ({ val: idx + 1, text: `${m}` }));
+            
+            const dayItems = [];
+            for(let d = 1; d <= 31; d++) dayItems.push({ val: d, text: `${d}` });
+
+            populateSelect('reviewYear', yearItems);
+            populateSelect('reviewMonth', monthItems);
+
+            populateSelect('flightYear', yearItems);
+            populateSelect('flightMonth', monthItems);
+            populateSelect('flightDay', dayItems);
+
+            updateFlightDatePreview();
+            onReviewFilterChange();
+        }
+
+        function updateFlightDatePreview() {
+            const jy = parseInt(document.getElementById('flightYear').value);
+            const jm = parseInt(document.getElementById('flightMonth').value);
+            const jd = parseInt(document.getElementById('flightDay').value);
+
+            const g = jalaliToGregorian(jy, jm, jd);
+            const gStr = `${g.gy}-${String(g.gm).padStart(2,'0')}-${String(g.gd).padStart(2,'0')} (${g.gd} ${G_MONTH_NAMES[g.gm - 1]} ${g.gy})`;
+            document.getElementById('gregorianDateDisplay').textContent = `معادل میلادی: ${gStr}`;
+        }
+
+        let currentLegs = [];
+
+        function addLeg() {
+            const sel = document.getElementById('routeSelect');
+            const parts = sel.value.split('|');
+            const routeName = parts[0];
+            const minutes = parseInt(parts[1], 10);
+            const fixedTime = parts[2];
+
+            currentLegs.push({
+                route: routeName,
+                minutes: minutes,
+                fixedTime: fixedTime
+            });
+
+            renderCurrentLegs();
+        }
+
+        function removeLeg(index) {
+            currentLegs.splice(index, 1);
+            renderCurrentLegs();
+        }
+
+        function renderCurrentLegs() {
+            const listContainer = document.getElementById('currentLegsList');
+            const totalDisplay = document.getElementById('currentFlightTotal');
+            const legsBadge = document.getElementById('legsCountBadge');
+            const saveBtn = document.getElementById('saveDutyBtn');
+
+            if (currentLegs.length === 0) {
+                listContainer.innerHTML = '';
+                totalDisplay.textContent = '00:00';
+                legsBadge.textContent = '۰ لگ انتخاب‌شده';
+                saveBtn.disabled = true;
+                return;
+            }
+
+            saveBtn.disabled = false;
+            legsBadge.textContent = `${currentLegs.length} لگ پروازی`;
+
+            let sumMin = 0;
+            listContainer.innerHTML = currentLegs.map((leg, idx) => {
+                sumMin += leg.minutes;
+                return `
+                    <div class="leg-row">
+                        <div>
+                            <span style="font-weight:bold;">لگ ${idx + 1}: ${leg.route}</span>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <span class="leg-badge">${leg.fixedTime}</span>
+                            <button class="btn-remove-leg" onclick="removeLeg(${idx})">✕</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            totalDisplay.textContent = formatMinutes(sumMin);
+        }
+
+        function getDuties() {
+            return JSON.parse(localStorage.getItem('avafix_monthly_duties') || '[]');
+        }
+
+        function saveFlightDuty() {
+            if (currentLegs.length === 0) return;
+
+            const jy = parseInt(document.getElementById('flightYear').value);
+            const jm = parseInt(document.getElementById('flightMonth').value);
+            const jd = parseInt(document.getElementById('flightDay').value);
+
+            const g = jalaliToGregorian(jy, jm, jd);
+            const gDateStr = `${g.gy}-${String(g.gm).padStart(2,'0')}-${String(g.gd).padStart(2,'0')}`;
+            const shamsiDateStr = `${jy}/${String(jm).padStart(2,'0')}/${String(jd).padStart(2,'0')}`;
+
+            const periodKey = `${jy}-${String(jm).padStart(2,'0')}`;
+            const periodTitle = `${PERSIAN_MONTHS[jm - 1]} ${jy}`;
+
+            const totalMinutes = currentLegs.reduce((sum, leg) => sum + leg.minutes, 0);
+
+            const duty = {
+                id: Date.now(),
+                year: jy,
+                month: jm,
+                periodKey: periodKey,
+                periodTitle: periodTitle,
+                dateShamsi: shamsiDateStr,
+                dateGregorian: gDateStr,
+                legs: [...currentLegs],
+                totalMinutes: totalMinutes,
+                totalFixedTime: formatMinutes(totalMinutes)
+            };
+
+            const duties = getDuties();
+            duties.unshift(duty);
+            localStorage.setItem('avafix_monthly_duties', JSON.stringify(duties));
+
+            document.getElementById('reviewYear').value = jy;
+            document.getElementById('reviewMonth').value = jm;
+            onReviewFilterChange();
+
+            currentLegs = [];
+            renderCurrentLegs();
+            toggleDrawer(true);
+        }
+
+        function deleteDuty(id) {
+            let duties = getDuties();
+            duties = duties.filter(d => d.id !== id);
+            localStorage.setItem('avafix_monthly_duties', JSON.stringify(duties));
+            onReviewFilterChange();
+            renderArchive();
+        }
+
+        function onReviewFilterChange() {
+            const selYear = parseInt(document.getElementById('reviewYear').value);
+            const selMonth = parseInt(document.getElementById('reviewMonth').value);
+            const targetPeriodKey = `${selYear}-${String(selMonth).padStart(2,'0')}`;
+            const targetTitle = `${PERSIAN_MONTHS[selMonth - 1]} ${selYear}`;
+
+            const gStart = jalaliToGregorian(selYear, selMonth, 1);
+            const gEnd = jalaliToGregorian(selYear, selMonth, selMonth <= 6 ? 31 : 30);
+            const gPeriodText = `${G_MONTH_NAMES[gStart.gm - 1]} ${gStart.gy} / ${G_MONTH_NAMES[gEnd.gm - 1]} ${gEnd.gy}`;
+
+            document.getElementById('reviewBannerTitle').textContent = `مجموع پروازهای ${targetTitle}:`;
+            document.getElementById('reviewGregorianPeriod').textContent = `دوره میلادی: ${gPeriodText}`;
+
+            const duties = getDuties();
+            const monthTotalMin = duties
+                .filter(d => d.periodKey === targetPeriodKey)
+                .reduce((acc, d) => acc + d.totalMinutes, 0);
+
+            document.getElementById('monthlyTotalDisplay').innerHTML = 
+                `${formatMinutes(monthTotalMin)} <span>ساعت</span>`;
+        }
+
+        function toggleDrawer(open) {
+            const root = document.getElementById('drawerRoot');
+            if(open) {
+                root.classList.add('drawer-open');
+                renderArchive();
+            } else {
+                root.classList.remove('drawer-open');
+            }
+        }
+
+        function renderArchive() {
+            const duties = getDuties();
+            const container = document.getElementById('archiveList');
+
+            if(duties.length === 0) {
+                container.innerHTML = '<div style="color:#718096; text-align:center; padding:25px 0;">هیچ پروازی در لاگ‌بوک ثبت نشده است.</div>';
+                return;
+            }
+
+            const groups = {};
+            duties.forEach(d => {
+                if(!groups[d.periodKey]) {
+                    groups[d.periodKey] = {
+                        title: d.periodTitle,
+                        totalMinutes: 0,
+                        list: []
+                    };
+                }
+                groups[d.periodKey].totalMinutes += d.totalMinutes;
+                groups[d.periodKey].list.push(d);
+            });
+
+            const sortedKeys = Object.keys(groups).sort().reverse();
+
+            container.innerHTML = sortedKeys.map(key => {
+                const g = groups[key];
+                return `
+                    <div class="month-group-card">
+                        <div class="month-group-header">
+                            <span>📁 ${g.title}</span>
+                            <span style="color:#68D391;">مجموع: ${formatMinutes(g.totalMinutes)}</span>
+                        </div>
+                        <div>
+                            ${g.list.map(duty => `
+                                <div class="archive-item">
+                                    <div class="archive-item-top">
+                                        <div>
+                                            <span style="font-size:12px; font-weight:bold; color:#E2E8F0;">📅 ${duty.dateShamsi}</span>
+                                            <span style="font-size:10px; color:#A0AEC0; margin-right:4px;">(${duty.dateGregorian})</span>
+                                        </div>
+                                        <div style="display:flex; align-items:center; gap:8px;">
+                                            <span style="font-size:13px; font-weight:bold; color:#FF6B6B;">${duty.totalFixedTime}</span>
+                                            <button class="btn-del" onclick="deleteDuty(${duty.id})">حذف</button>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        ${duty.legs.map((l, i) => `
+                                            <div class="archive-leg-detail">
+                                                <span>لگ ${i+1}: ${l.route}</span>
+                                                <span>${l.fixedTime}</span>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.onload = function() {
+            initDatePickers();
+        };
+    </script>
+</body>
+</html>
